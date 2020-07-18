@@ -1,0 +1,46 @@
+{
+  "name": "turtles_ui",
+  "version": "0.0.1",
+  "main": "index.js",
+  "author": "Hunter Trujillo <hunter@cryptoquick.com>",
+  "private": true,
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "yarn build && yarn server",
+    "server": "node lib/api/index.js",
+    "clean": "rm -rf lib",
+    "build-ts": "tsc -p tsconfig.json",
+    "build-web": "webpack --config lib/util/webpack.config.js",
+    "build-styles": "stylus styles/index.styl -o lib/dist/styles.css",
+    "build-prod": "NODE_ENV=production yarn build",
+    "build": "yarn clean && yarn build-styles && yarn build-ts && yarn build-web",
+    "watch-ts": "tsc --incremental -w -p tsconfig.json",
+    "watch-styles": "stylus -w styles/index.styl -o lib/dist/styles.css",
+    "livereload": "livereload lib/dist/main.js lib/dist/styles.css",
+    "watch-web": "nodemon -w lib/web -x 'yarn build-web'",
+    "watch-server": "nodemon -w lib/api -w lib/lib lib/api/index.js",
+    "watch": "NODE_ENV=development concurrently 'yarn watch-ts' 'yarn watch-web' 'yarn watch-server' 'yarn watch-styles' 'yarn livereload'"
+  },
+  "devDependencies": {
+    "concurrently": "^5.2.0",
+    "livereload": "^0.9.1",
+    "nodemon": "^2.0.4",
+    "pkg": "^4.4.9",
+    "prettier": "^2.0.5",
+    "stylus": "^0.54.8",
+    "typescript": "^3.9.7",
+    "webpack": "^4.43.0",
+    "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "@types/express": "^4.17.7",
+    "@types/node": "^14.0.23",
+    "@types/react": "^16.9.43",
+    "@types/react-dom": "^16.9.8",
+    "express": "^4.17.1",
+    "navi": "^0.14.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-navi": "^0.14.4"
+  }
+}
