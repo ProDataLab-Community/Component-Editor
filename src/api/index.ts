@@ -1,7 +1,9 @@
 import * as path from 'path'
+import * as http from 'http'
 import * as express from 'express'
+import { Pub, Sub } from 'jszmq'
 
-import { PORT } from '../lib/constants'
+import { PORT, CONNECTION } from '../lib/constants'
 import { HTML } from '../lib/html'
 
 const { NODE_ENV } = process.env
@@ -19,12 +21,47 @@ const serveFile = (file: string, mime: string) =>
 serveFile('/main.js', 'text/javascript')
 serveFile('/styles.css', 'text/css')
 
-app.get('/', (req, res) => {
+app.get('*', (req, res) => {
   const { path } = req
   console.info(path)
   res.send(HTML(NODE_ENV))
 })
 
-app.listen(PORT, () => {
+const server = http.createServer(app)
+
+const pub = new Pub()
+const sub = new Sub()
+
+pub.bind(`ws://localhost:${PORT}/browser`, server)
+
+sub.subscribe('SERVER_EVENTS')
+sub.bind(`ws://localhost:${PORT}/server`, server)
+
+sub.on('message', (msg: string) => {
+  console.log('msg', msg.toString())
+  pub.send(`BROWSER_EVENTS:${msg.toString().substr('SERVER_EVENTS:'.length)}`)
+})
+
+// sub.on('attach', (x) => {
+//   console.log('client attached', x)
+//   pub.send([TOPIC, 'client ready'])
+// })
+
+// pub.on('attach', (x) => {
+//   console.log('client attached', x)
+//   pub.send('client ready')
+// })
+
+// pub.on('message', (x) => {
+//   console.log('client attached', x)
+//   pub.send('client ready')
+// })
+
+setInterval(() => {
+  console.log('sending work')
+  pub.send('BROWSER_EVENTS:some work')
+}, 10000)
+
+server.listen(PORT, () => {
   console.info('listening on port', PORT)
 })

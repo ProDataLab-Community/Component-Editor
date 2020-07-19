@@ -8,7 +8,7 @@ export const Help = () => (
     <ul>
       <li>Stack View - 1</li>
       <li>Code View - 2</li>
-      <li>Box View - unimplemented</li>
+      <li>3D View - unimplemented</li>
     </ul>
     <p>Toggle between edit and interact modes with the tab key.</p>
   </div>
