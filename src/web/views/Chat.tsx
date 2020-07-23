@@ -10,6 +10,37 @@ interface Test {
   topic: string
 }
 
+const colorClasses = [
+  'flat-green-1',
+  'flat-green-2',
+  'flat-green-3',
+  'flat-green-4',
+  'flat-blue-1',
+  'flat-blue-2',
+  'flat-blue-3',
+  'flat-blue-4',
+  'flat-purple-1',
+  'flat-purple-2',
+  'flat-yellow-1',
+  'flat-orange-1',
+  'flat-orange-2',
+  'flat-orange-3',
+  'flat-red-1',
+  'flat-red-2',
+]
+
+const classNames = (...classes: string[]): string => {
+  return classes.join(' ')
+}
+
+const colorClassHash = (str: string) => {
+  const total = str
+    .split('')
+    .reduce((acc, char: string) => acc + char.charCodeAt(0), 0)
+
+  return colorClasses[total % colorClasses.length]
+}
+
 const createEvents = (topic = '') => ({
   browserEvent: (data = '') => `BROWSER_EVENTS:${topic}:${data}`,
   serverEvent: (data = '') => `SERVER_EVENTS:${topic}:${data}`,
@@ -29,10 +60,20 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
     [],
   )
 
+  const [username, setUsername] = React.useState<string>('')
+
+  const usernameInput = React.createRef<HTMLInputElement>()
+
+  const usernameHandler = (evt: React.FormEvent) => {
+    const value = usernameInput.current?.value || ''
+    setUsername(value)
+    pub.send(serverEvent([cuid(), value, `has entered the chat`].join(':')))
+    evt.preventDefault()
+  }
+
   const { browserEvent, serverEvent } = createEvents(topic)
 
   const messageHandler = (msg: string) => {
-    console.log(messages)
     dispatchMessage(msg.toString().substr(browserEvent().length))
   }
 
@@ -46,11 +87,30 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
     }
   }, [true])
 
-  const text = React.createRef<HTMLTextAreaElement>()
+  if (!username.length) {
+    return (
+      <div className="chat">
+        <form autoComplete="false" onSubmit={usernameHandler}>
+          <input
+            type="text"
+            ref={usernameInput}
+            className={classNames('username', username)}
+            placeholder="Your Username"
+          />
+          <input type="submit" value="Set Username" />
+        </form>
+      </div>
+    )
+  }
+
+  const text = React.createRef<HTMLInputElement>()
 
   const submitHandler = (evt: React.FormEvent) => {
     const value = text.current?.value || ''
-    pub.send(serverEvent([cuid(), value].join(':')))
+    pub.send(serverEvent([cuid(), username, value].join(':')))
+    if (text.current) {
+      text.current.value = ''
+    }
     evt.preventDefault()
   }
 
@@ -58,15 +118,17 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
     <div className="chat">
       <div className="chat-header">Turtle Chat</div>
       <form autoComplete="false" onSubmit={submitHandler}>
-        <textarea ref={text} />
+        <input type="text" ref={text} />
         <input type="submit" value="Send" />
       </form>
       <div className="chat-log">
         {messages.map((message: string) => {
-          const [id, text] = message.split(':')
+          const [id, username, text] = message.split(':')
           return (
             <div key={id} className="chat-message">
-              {text}
+              <span className={colorClassHash(username)}>{username}</span>
+              &nbsp;
+              <span>{text}</span>
             </div>
           )
         })}
