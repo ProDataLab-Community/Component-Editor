@@ -1,6 +1,6 @@
 {
   "name": "turtles_ui",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "index.js",
   "author": "Hunter Trujillo <hunter@cryptoquick.com>",
   "private": true,
