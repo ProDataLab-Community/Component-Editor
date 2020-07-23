@@ -15,7 +15,6 @@ export const Adapter: React.FC<Adapter> = ({ pub, sub, name }) => {
 
   React.useEffect(() => {
     const messageHandler = (msg: string) => {
-      console.log(msg.toString())
       setData(msg.toString().substr('BROWSER_EVENTS:'.length))
     }
 
@@ -64,7 +63,6 @@ export const Orchestrator: React.FC = () => {
     sub.connect(`${protocol}//localhost:${PORT}/browser`)
 
     return () => {
-      console.log('no!')
       pub.close()
       sub.close()
     }
