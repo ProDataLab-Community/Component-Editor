@@ -42,7 +42,7 @@
     "@types/react-redux": "^7.1.9",
     "cuid": "^2.1.8",
     "express": "^4.17.1",
-    "jszmq": "file:../jszmq",
+    "jszmq": "https://github.com/ProDataLab-Community/jszmq.git",
     "messagepack": "^1.1.10",
     "msgpack": "^1.0.3",
     "navi": "^0.14.0",
