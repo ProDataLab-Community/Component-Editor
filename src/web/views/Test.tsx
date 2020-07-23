@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Pub, Sub } from 'jszmq'
+import { Pub, Sub } from '@prodatalab/jszmq'
 
 const PORT = 3000
 

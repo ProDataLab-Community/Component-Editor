@@ -1,7 +1,7 @@
 import * as path from 'path'
 import * as http from 'http'
 import * as express from 'express'
-import { Pub, Sub } from 'jszmq'
+import { Pub, Sub } from '@prodatalab/jszmq'
 
 import { PORT } from '../lib/constants'
 import { HTML } from '../lib/html'
