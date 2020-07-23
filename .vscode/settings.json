@@ -11,5 +11,9 @@
   "javascript.format.enable": true,
   "[yaml]": {
     "editor.defaultFormatter": "redhat.vscode-yaml"
-  }
+  },
+  "[stylus]": {
+    "editor.defaultFormatter": "thisismanta.stylus-supremacy"
+  },
+  "stylusSupremacy.insertSemicolons": false
 }

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { mount, route } from 'navi'
 
-import { Help, Stacks, Orchestrator } from './views'
+import { Help, Stacks, Orchestrator, Chat } from './views'
 
 export const routes = mount({
   '/': route({
@@ -12,5 +12,8 @@ export const routes = mount({
   }),
   '/test': route({
     view: <Orchestrator />,
+  }),
+  '/chat': route({
+    view: <Chat />,
   }),
 })

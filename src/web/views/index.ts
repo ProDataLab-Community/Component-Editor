@@ -6,3 +6,5 @@ export * from './Stacks'
 export * from './Config'
 
 export * from './Test'
+
+export * from './Chat'

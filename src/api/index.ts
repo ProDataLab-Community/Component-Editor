@@ -43,10 +43,6 @@ sub.on('message', (msg: Buffer) => {
   )
 })
 
-setInterval(() => {
-  pub.send('BROWSER_EVENTS:some work')
-}, 10000)
-
 server.listen(PORT, () => {
   console.info('listening on port', PORT)
 })

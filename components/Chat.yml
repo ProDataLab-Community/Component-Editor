@@ -16,7 +16,7 @@ Chat Widget/Heading: # Prefixed for namespacing, but the prefix is optional
   Type: HTML Tag/Heading
   Options:
     heading_level: 3
-    text: "Chat Widget"
+    text: Chat Widget
 
 HTML Tag/heading:
   Type: TODO
