@@ -3,7 +3,7 @@ import * as http from 'http'
 import * as express from 'express'
 import { Pub, Sub } from 'jszmq'
 
-import { PORT, CONNECTION } from '../lib/constants'
+import { PORT } from '../lib/constants'
 import { HTML } from '../lib/html'
 
 const { NODE_ENV } = process.env
@@ -37,28 +37,13 @@ pub.bind(`ws://localhost:${PORT}/browser`, server)
 sub.subscribe('SERVER_EVENTS')
 sub.bind(`ws://localhost:${PORT}/server`, server)
 
-sub.on('message', (msg: string) => {
-  console.log('msg', msg.toString())
-  pub.send(`BROWSER_EVENTS:${msg.toString().substr('SERVER_EVENTS:'.length)}`)
+sub.on('message', (msg: Buffer) => {
+  pub.send(
+    `BROWSER_EVENTS:${msg.toString('utf8').substr('SERVER_EVENTS:'.length)}`,
+  )
 })
 
-// sub.on('attach', (x) => {
-//   console.log('client attached', x)
-//   pub.send([TOPIC, 'client ready'])
-// })
-
-// pub.on('attach', (x) => {
-//   console.log('client attached', x)
-//   pub.send('client ready')
-// })
-
-// pub.on('message', (x) => {
-//   console.log('client attached', x)
-//   pub.send('client ready')
-// })
-
 setInterval(() => {
-  console.log('sending work')
   pub.send('BROWSER_EVENTS:some work')
 }, 10000)
 

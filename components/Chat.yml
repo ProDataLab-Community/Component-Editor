@@ -1,0 +1,42 @@
+Main: # Reserved component name
+  Layout: Single Column List
+
+Single Column List:
+  HTML:
+    - div
+  Styles:
+    - Flex
+    - Flex Direction Column
+
+Chat Widget:
+  - Heading
+  - Required Input Wizard
+
+Chat Widget/Heading: # Prefixed for namespacing, but the prefix is optional
+  Type: HTML Tag/Heading
+  Options:
+    heading_level: 3
+    text: "Chat Widget"
+
+HTML Tag/heading:
+  Type: TODO
+
+## Prefixes specify from right to left, to override in order of specificity.
+
+Required Input Wizard:
+  - Column Style
+
+wizard:
+  - page_1
+
+required_input_wizard:
+  - user_name
+  - chat_list_reversed
+  - chat_input
+
+user_name:
+  - text_input # could be HTML on the frontend, or just a field on backend
+  - basic_identity
+
+event_stream:
+  - TODO

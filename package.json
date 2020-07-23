@@ -33,6 +33,7 @@
     "webpack-cli": "^3.3.12"
   },
   "dependencies": {
+    "@msgpack/msgpack": "^1.12.2",
     "@reduxjs/toolkit": "^1.4.0",
     "@types/express": "^4.17.7",
     "@types/node": "^14.0.23",

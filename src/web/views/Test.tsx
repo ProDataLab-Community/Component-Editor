@@ -40,9 +40,7 @@ export const Test: React.FC<Test> = ({ pub, sub, name }) => {
 
   return (
     <div>
-      <div>
-        <textarea ref={text} value={data} onChange={changeHandler} />
-      </div>
+      <textarea ref={text} value={data} onChange={changeHandler} />
     </div>
   )
 }

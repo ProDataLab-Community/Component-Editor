@@ -1,18 +1,18 @@
-export type Endpoint = string // Socket connection string
-export type Endpoints = Set<Endpoint>
-
-export type Implementation = string // e.g. nodejs, react, etc.
-export type Implementations = Map<Implementation, Endpoint>
-
 export type Name = string
-export type Names = Map<Endpoint, Name>
 
-export type Subscribers = Map<Endpoint, Endpoints>
-export type Publishers = Map<Endpoint, Endpoints>
-
-export interface Component {
-  name: Name
-  endpoints: Endpoints
-  subscribers: Subscribers
-  publishers: Publishers
+export interface Adapter {
+  endpoint: string
+  platform: string // node-js, web-js, etc.
+  implementation: string // express, react
 }
+export type Adapters = Map<Name, Adapter[]>
+
+// export type Subscriptions = Map<Endpoint, Endpoints>
+// export type Publishing = Map<Endpoint, Endpoints>
+
+// export interface Component {
+//   name: Name
+//   endpoints: Endpoints
+//   subscribers: Subscribers
+//   publishers: Publishers
+// }

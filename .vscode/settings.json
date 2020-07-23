@@ -8,5 +8,8 @@
   },
   "editor.formatOnSave": true,
   "files.autoSave": "onFocusChange",
-  "javascript.format.enable": true
+  "javascript.format.enable": true,
+  "[yaml]": {
+    "editor.defaultFormatter": "redhat.vscode-yaml"
+  }
 }

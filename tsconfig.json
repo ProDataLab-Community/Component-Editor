@@ -14,7 +14,8 @@
     "noImplicitReturns": true,
     "allowJs": false,
     "allowSyntheticDefaultImports": false,
-    "jsx": "react"
+    "jsx": "react",
+    "resolveJsonModule": true
   },
   "watchOptions": {
     "watchFile": "useFsEvents",
