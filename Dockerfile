@@ -22,6 +22,6 @@ RUN yarn build
 
 EXPOSE 3000
 
-ENV NODE_ENV PRODUCTION
+ENV NODE_ENV production
 
 CMD [ "yarn", "server" ]
