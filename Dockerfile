@@ -8,7 +8,7 @@ COPY yarn.lock ./
 ENV NODE_ENV production
 
 RUN yarn
-RUN yarn global add typescript webpack stylus
+RUN yarn global add typescript webpack webpack-cli stylus
 
 COPY tsconfig.json ./
 COPY src src

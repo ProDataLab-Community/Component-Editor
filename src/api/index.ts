@@ -10,7 +10,7 @@ const { NODE_ENV } = process.env
 
 const app = express()
 
-const dist = path.resolve(__dirname, '..', 'dist')
+const dist = path.resolve(process.cwd(), 'lib', 'dist')
 
 const serveFile = (file: string, mime: string) =>
   app.get(file, (_req, res) => {
