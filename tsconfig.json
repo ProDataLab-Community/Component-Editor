@@ -20,5 +20,6 @@
   "watchOptions": {
     "watchFile": "useFsEvents",
     "watchDirectory": "useFsEvents"
-  }
+  },
+  "exclude": ["**/*.d.ts", "./lib", "node_modules"]
 }

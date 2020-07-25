@@ -1,15 +1,10 @@
 import * as React from 'react'
 import { Pub, Sub } from '@prodatalab/jszmq'
+import { encode, decode } from '@msgpack/msgpack'
+import { Buffer } from 'buffer'
 import * as cuid from 'cuid'
 
-const PORT = 3000
-
-interface Test {
-  pub: Pub
-  sub: Sub
-  topic: string
-}
-
+// Styles
 const colorClasses = [
   'flat-green-1',
   'flat-green-2',
@@ -41,20 +36,49 @@ const colorClassHash = (str: string) => {
   return colorClasses[total % colorClasses.length]
 }
 
-const createEvents = (topic = '') => ({
-  browserEvent: (data = '') => `BROWSER_EVENTS:${topic}:${data}`,
-  serverEvent: (data = '') => `SERVER_EVENTS:${topic}:${data}`,
+// Serialization
+interface ActionEvent<T> {
+  type: string
+  payload: T
+}
+
+const formatTopic = (str: string) => Buffer.from(encode([str])).slice(0, -1)
+
+const createEvents = (type = '') => ({
+  browserEvent: <T extends {}>(payload: T) =>
+    Buffer.from(encode(['BROWSER_EVENTS:', { type, payload }])),
+  serverEvent: <T extends {}>(payload: T) =>
+    Buffer.from(encode(['SERVER_EVENTS:', { type, payload }])),
 })
 
-type MessageReducer = React.Reducer<string[], string>
+const decodeEvent = <T extends {}>(msg: Buffer): ActionEvent<T> => {
+  const [_topic, action] = decode(msg) as [string, ActionEvent<T>]
+  return action
+}
+
+// Component
+interface Message {
+  id: string
+  user: string
+  text: string
+  time: number
+}
+
+interface Test {
+  pub: Pub
+  sub: Sub
+  type: string
+}
+
+type MessageReducer = React.Reducer<Message[], Message>
 const messageReducer = (
-  state: string[],
+  state: Message[],
   action: React.ReducerAction<MessageReducer>,
 ) => {
   return [...state, action]
 }
 
-export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
+export const ChatLog: React.FC<Test> = ({ pub, sub, type }) => {
   const [messages, dispatchMessage] = React.useReducer<MessageReducer>(
     messageReducer,
     [],
@@ -64,26 +88,36 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
 
   const usernameInput = React.createRef<HTMLInputElement>()
 
+  const { serverEvent } = createEvents(type)
+
   const usernameHandler = (evt: React.FormEvent) => {
     const value = usernameInput.current?.value || ''
     setUsername(value)
-    pub.send(serverEvent([cuid(), value, `has entered the chat`].join(':')))
+    pub.send(
+      serverEvent<Message>({
+        id: cuid(),
+        user: value,
+        text: `has entered the chat`,
+        time: Date.now(),
+      }),
+    )
     evt.preventDefault()
   }
 
-  const { browserEvent, serverEvent } = createEvents(topic)
-
-  const messageHandler = (msg: string) => {
-    dispatchMessage(msg.toString().substr(browserEvent().length))
+  const messageHandler = (msg: Buffer) => {
+    const { type: actionType, payload } = decodeEvent<Message>(msg)
+    if (actionType === type) {
+      dispatchMessage(payload)
+    }
   }
 
   React.useEffect(() => {
-    sub.subscribe(browserEvent())
+    sub.subscribe(formatTopic('BROWSER_EVENTS:'))
     sub.on('message', messageHandler)
 
     return () => {
       sub.removeListener('message', messageHandler)
-      sub.unsubscribe(browserEvent())
+      sub.unsubscribe(formatTopic('BROWSER_EVENTS:'))
     }
   }, [true])
 
@@ -107,10 +141,20 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
 
   const submitHandler = (evt: React.FormEvent) => {
     const value = text.current?.value || ''
-    pub.send(serverEvent([cuid(), username, value].join(':')))
+
+    pub.send(
+      serverEvent<Message>({
+        id: cuid(),
+        user: username,
+        text: value,
+        time: Date.now(),
+      }),
+    )
+
     if (text.current) {
       text.current.value = ''
     }
+
     evt.preventDefault()
   }
 
@@ -122,11 +166,11 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
         <input type="submit" value="Send" />
       </form>
       <div className="chat-log">
-        {messages.map((message: string) => {
-          const [id, username, text] = message.split(':')
+        {messages.map((message: Message) => {
+          const { id, user, text } = message
           return (
             <div key={id} className="chat-message">
-              <span className={colorClassHash(username)}>{username}</span>
+              <span className={colorClassHash(user)}>{user}</span>
               &nbsp;
               <span>{text}</span>
             </div>
@@ -136,6 +180,8 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, topic }) => {
     </div>
   )
 }
+
+const PORT = 3000
 
 export const Chat: React.FC = () => {
   const pub = new Pub()
@@ -153,5 +199,5 @@ export const Chat: React.FC = () => {
     }
   })
 
-  return <ChatLog pub={pub} sub={sub} topic={'CHAT_LOG'} />
+  return <ChatLog pub={pub} sub={sub} type={'CHAT_LOG'} />
 }
