@@ -4,8 +4,15 @@
     "target": "ES5",
     "moduleResolution": "Node",
     "sourceMap": true,
-    "rootDirs": ["src"],
+    "baseUrl": "src",
+    "rootDir": "src",
     "outDir": "lib",
+    "paths": {
+      "lib/*": ["lib/*"]
+    },
+    "plugins": [
+      { "transform": "@zerollup/ts-transform-paths", "exclude": ["*"] }
+    ],
     "noEmitOnError": true,
     "lib": ["ESNext", "DOM"],
     "strict": true,
@@ -15,7 +22,8 @@
     "allowJs": false,
     "allowSyntheticDefaultImports": false,
     "jsx": "react",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "skipLibCheck": true
   },
   "watchOptions": {
     "watchFile": "useFsEvents",

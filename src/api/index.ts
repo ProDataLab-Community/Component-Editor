@@ -4,8 +4,9 @@ import * as express from 'express'
 import { Pub, Sub } from '@prodatalab/jszmq'
 import { encode, decode } from '@msgpack/msgpack'
 
-import { PORT } from '../lib/constants'
-import { HTML } from '../lib/html'
+import { PORT } from 'lib/constants'
+import { HTML } from 'lib/html'
+import { createEvents, decodeEvent, formatTopic } from 'lib/interfaces'
 
 const { NODE_ENV } = process.env
 
@@ -32,24 +33,6 @@ app.get('*', (req, res) => {
 const server = http.createServer(app)
 
 // Serialization
-interface ActionEvent<T> {
-  type: string
-  payload: T
-}
-
-const formatTopic = (str: string) => Buffer.from(encode([str])).slice(0, -1)
-
-const createEvents = (type = '') => ({
-  browserEvent: <T extends {}>(payload: T) =>
-    Buffer.from(encode(['BROWSER_EVENTS:', { type, payload }])),
-  serverEvent: <T extends {}>(payload: T) =>
-    Buffer.from(encode(['SERVER_EVENTS:', { type, payload }])),
-})
-
-const decodeEvent = <T extends {}>(msg: Buffer): ActionEvent<T> => {
-  const [_topic, action] = decode(msg) as [string, ActionEvent<T>]
-  return action
-}
 
 // ZeroMQ Connections
 const pub = new Pub()
