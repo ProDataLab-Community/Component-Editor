@@ -40,7 +40,6 @@ export const Adapter: React.FC<Adapter> = ({ pub, sub, name }) => {
   )
 }
 
-// TODO: temporary
 export const Orchestrator: React.FC = () => {
   const pub = new Pub()
   const sub = new Sub()

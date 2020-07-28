@@ -2,7 +2,14 @@ import * as React from 'react'
 import { Pub, Sub } from '@prodatalab/jszmq'
 import * as cuid from 'cuid'
 
-import { createEvents, decodeEvent, formatTopic } from 'lib/interfaces'
+import {
+  encodeActionEvent,
+  decodeActionEvent,
+  formatPrefix,
+  Endpoint,
+  Topic,
+  ChatMessage,
+} from 'lib/interfaces'
 
 // Styles
 const colorClasses = [
@@ -37,28 +44,21 @@ const colorClassHash = (str: string) => {
 }
 
 // Component
-interface Message {
-  id: string
-  user: string
-  text: string
-  time: number
-}
-
-interface Test {
+interface ChatProps {
   pub: Pub
   sub: Sub
-  type: string
+  topic: Topic
 }
 
-type MessageReducer = React.Reducer<Message[], Message>
+type MessageReducer = React.Reducer<ChatMessage[], ChatMessage>
 const messageReducer = (
-  state: Message[],
+  state: ChatMessage[],
   action: React.ReducerAction<MessageReducer>,
 ) => {
   return [...state, action]
 }
 
-export const ChatLog: React.FC<Test> = ({ pub, sub, type }) => {
+export const ChatLog: React.FC<ChatProps> = ({ pub, sub, topic }) => {
   const [messages, dispatchMessage] = React.useReducer<MessageReducer>(
     messageReducer,
     [],
@@ -68,36 +68,38 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, type }) => {
 
   const usernameInput = React.createRef<HTMLInputElement>()
 
-  const { serverEvent } = createEvents(type)
-
   const usernameHandler = (evt: React.FormEvent) => {
     const value = usernameInput.current?.value || ''
     setUsername(value)
-    pub.send(
-      serverEvent<Message>({
-        id: cuid(),
-        user: value,
-        text: `has entered the chat`,
-        time: Date.now(),
-      }),
-    )
+
+    const chatMessage = encodeActionEvent(Endpoint.Server, Topic.Chat_Message, {
+      id: cuid(),
+      user: value,
+      text: `has entered the chat`,
+      time: Date.now(),
+    })
+
+    pub.send(chatMessage)
     evt.preventDefault()
   }
 
   const messageHandler = (msg: Buffer) => {
-    const { type: actionType, payload } = decodeEvent<Message>(msg)
-    if (actionType === type) {
-      dispatchMessage(payload)
+    const actionEvent = decodeActionEvent<ChatMessage>(msg)
+    if (
+      actionEvent.endpoint === Endpoint.Browser &&
+      topic === actionEvent.topic
+    ) {
+      dispatchMessage(actionEvent.payload)
     }
   }
 
   React.useEffect(() => {
-    sub.subscribe(formatTopic('BROWSER_EVENTS:'))
+    sub.subscribe(formatPrefix(Endpoint.Browser, Topic.Chat_Message))
     sub.on('message', messageHandler)
 
     return () => {
       sub.removeListener('message', messageHandler)
-      sub.unsubscribe(formatTopic('BROWSER_EVENTS:'))
+      sub.unsubscribe(formatPrefix(Endpoint.Browser, Topic.Chat_Message))
     }
   }, [true])
 
@@ -122,14 +124,18 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, type }) => {
   const submitHandler = (evt: React.FormEvent) => {
     const value = text.current?.value || ''
 
-    pub.send(
-      serverEvent<Message>({
+    const chatMessage = encodeActionEvent<ChatMessage>(
+      Endpoint.Server,
+      Topic.Chat_Message,
+      {
         id: cuid(),
         user: username,
         text: value,
         time: Date.now(),
-      }),
+      },
     )
+
+    pub.send(chatMessage)
 
     if (text.current) {
       text.current.value = ''
@@ -146,7 +152,7 @@ export const ChatLog: React.FC<Test> = ({ pub, sub, type }) => {
         <input type="submit" value="Send" />
       </form>
       <div className="chat-log">
-        {messages.map((message: Message) => {
+        {messages.map((message: ChatMessage) => {
           const { id, user, text } = message
           return (
             <div key={id} className="chat-message">
@@ -179,5 +185,5 @@ export const Chat: React.FC = () => {
     }
   })
 
-  return <ChatLog pub={pub} sub={sub} type={'CHAT_LOG'} />
+  return <ChatLog pub={pub} sub={sub} topic={Topic.Chat_Message} />
 }

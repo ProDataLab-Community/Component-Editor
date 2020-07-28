@@ -1,23 +1,44 @@
-import { encode, decode } from '@msgpack/msgpack'
 import { Buffer } from 'buffer'
 
 // Serialization
+export enum Topic {
+  Chat_Message = 'chat/message',
+}
+
+export enum Endpoint {
+  Browser = 'Browser',
+  Server = 'Server',
+}
+
 export interface ActionEvent<T> {
-  type: string
+  endpoint: Endpoint
+  topic: Topic
   payload: T
 }
 
-export const formatTopic = (str: string) =>
-  Buffer.from(encode([str])).slice(0, -1)
+export const formatPrefix = (endpoint: Endpoint, topic: Topic) =>
+  Buffer.from(JSON.stringify([endpoint, topic])).slice(0, -2) // removes "] for topic generalization
 
-export const createEvents = (type = '') => ({
-  browserEvent: <T extends {}>(payload: T) =>
-    Buffer.from(encode(['BROWSER_EVENTS:', { type, payload }])),
-  serverEvent: <T extends {}>(payload: T) =>
-    Buffer.from(encode(['SERVER_EVENTS:', { type, payload }])),
-})
+export const encodeActionEvent = <T>(
+  endpoint: Endpoint,
+  topic: Topic,
+  payload: T,
+) => JSON.stringify([endpoint, topic, payload])
 
-export const decodeEvent = <T extends {}>(msg: Buffer): ActionEvent<T> => {
-  const [_topic, action] = decode(msg) as [string, ActionEvent<T>]
-  return action
+export const decodeActionEvent = <T>(msg: Buffer): ActionEvent<T> => {
+  const [endpoint, topic, payload] = JSON.parse(msg.toString('utf-8')) as [
+    Endpoint,
+    Topic,
+    T,
+  ]
+  return { endpoint, topic, payload }
+}
+
+// Types
+
+export interface ChatMessage {
+  id: string
+  user: string
+  text: string
+  time: number
 }
